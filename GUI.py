@@ -1,3 +1,9 @@
+"""
+This interface is designed as a tool for clinicians to easily and intuitively interact with the neural network developed in this project.
+The Graphic User Interface (GUI) allows visualization of patient dsMRI images as a video and provides automatic segmentation of the articulators in the vocal tract, displaying them to the medical specialist.
+Additionally, the interface includes a graphical representation of the articulator area and its variation over the entire protocol duration.
+"""
+
 import tkinter as tk
 import os
 from PIL import Image, ImageTk, ImageOps
@@ -7,15 +13,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys
 
-# This is interface is though as a tool for clinicians to exploit the neural network we developed in a simple and
-# intuitive way. The GUI can display the patient dsMRI images as a video and segment all the articulators in their vocal
-# tract displaying them to the medical doctor. In addition, it is also possible to see in a graph the trend of the area
-# and its variation during all the protocol duration.
-
+# DATA IMPORT
 path_init = r"C:\Users\saram\PycharmProjects\neuroPW\Dataset_new_new"  # folder where all the patient's images are contained
 model = tf.keras.models.load_model('model.keras', compile=False)   # load of the model you want to use to segment
 
-# Initialization of global variables
+# GLOBAL VARIABLES INITIALIZATION
 x_test = []
 num_images = 0
 y_pred = []
@@ -27,6 +29,7 @@ time_derivatives = []
 
 
 def get_patient_images():
+    
     """
     Function to load and preprocess patient images. Optionally adds Gaussian noise
     and rescales the image intensities based on the patient's data.
@@ -51,8 +54,7 @@ def get_patient_images():
         x_test = 0.12 + (x_test - x_min) * (1 - 0.12) / (x_max - x_min)
 
     return x_test
-
-
+    
 
 def play_video(tensor, label, delay=100, index=0):
 
@@ -78,17 +80,17 @@ def play_video(tensor, label, delay=100, index=0):
         print("End of video")
 
 
-
 def on_play_button():
     play_video(x_test, video_label)
 
 
-
 def predict():
+    
     """
     Function to make predictions on the test data using the trained model.
     The predictions are converted to one-hot encoding for further processing.
     """
+    
     global y_pred
     global predictions_max
 
@@ -107,10 +109,12 @@ def predict():
 
 
 def metrics_calculation(n):
+    
     """
     Function to calculate metrics based on the predictions.
     Computes the area for each class and their time derivatives.
     """
+    
     global areas
     global time_derivatives
 
@@ -124,11 +128,12 @@ def metrics_calculation(n):
     time_derivatives = np.diff(areas, axis=0)
 
 
-
 def combine_all_frames(index, x, y, color):
+    
     """
     Function to overlay the segmentation mask onto the corresponding image.
     """
+    
     combined_images = []
     num_frames = x.shape[0]  # Number of frames in the input data
 
@@ -156,8 +161,8 @@ def combine_all_frames(index, x, y, color):
     return combined_images
 
 
-
 def play_video_from_images(image_list, label, delay=100, index=0):
+    
     """
     Function to display a sequence of images as a video starting from an image list.
     """
@@ -180,15 +185,14 @@ def play_video_from_images(image_list, label, delay=100, index=0):
 
 
 
-# Functions to display a video where each frame consists of the original image overlaid with the segmentation for each
-# class. These functions allow visualizing how the segmentation evolves over time for all the classes.
+# Functions to display a video where each frame consists of the original image overlaid with the segmentation for each class.
+# These functions allow visualizing how the segmentation evolves over time for all the classes.
 
 def show_bkg():
     global region
     region = 0
     combined_frames = combine_all_frames(0, x_test, y_pred, "red")
     play_video_from_images(combined_frames, segmentation_label)
-
 
 def show_ul():
     global region
@@ -201,7 +205,6 @@ def show_hp():
     region = 2
     combined_frames = combine_all_frames(2, x_test, y_pred, "orange")
     play_video_from_images(combined_frames, segmentation_label)
-
 
 def show_sp():
     global region
@@ -228,10 +231,8 @@ def show_he():
     play_video_from_images(combined_frames, segmentation_label)
 
 
-
-
-
 def graph(y, graph_title, y_name, y_min, y_max):
+    
     """
     Function to plot a graph in a Tkinter window, displaying trends over frames.
     """
@@ -249,7 +250,6 @@ def graph(y, graph_title, y_name, y_min, y_max):
 
     # Position the canvas widget in the Tkinter grid
     canvas_widget.grid(row=3, column=4, columnspan=4, padx=5, pady=5)
-
     canvas.draw()
 
 
@@ -384,5 +384,6 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 
 # Start the GUI loop
 window.mainloop()
+
 
 
